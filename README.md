@@ -57,6 +57,8 @@ cd frontend && npm run dev -- --port 5173
 
 ```env
 PORT=4000
+NODE_ENV=development
+FRONTEND_URL=http://localhost:5173
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/ventas_almacenes
 JWT_SECRET=cambia_este_secreto
 
@@ -68,6 +70,12 @@ GOOGLE_OAUTH_REDIRECT_URI=http://localhost:4000/api/auth/google/callback
 GOOGLE_DRIVE_AUTO_SYNC=false
 GOOGLE_DRIVE_AUTO_SYNC_MINUTES=15
 GOOGLE_DRIVE_AUTO_SYNC_REPLACE_PERIOD=false
+```
+
+En el frontend:
+
+```env
+VITE_API_URL=http://localhost:4000/api
 ```
 
 `GOOGLE_DRIVE_FOLDER_ID` es la carpeta donde se suben los archivos de ventas. El sistema toma el archivo más reciente automáticamente, así no necesitas cambiar IDs cada mes.
@@ -91,6 +99,24 @@ GOOGLE_DRIVE_AUTO_SYNC_REPLACE_PERIOD=false
 7. Pulsa `Sincronizar Drive`.
 
 Si subes un archivo corregido del mismo periodo, marca `Reemplazar ventas del periodo importado`. El sistema respalda las ventas anteriores en `ventas_respaldo` antes de borrar e importar de nuevo.
+
+## Importación manual de Excel
+
+El botón `Importar Excel` usa carga de archivo desde el navegador. En producción no se debe escribir una ruta local del servidor; el administrador selecciona el `.xls` o `.xlsx` desde su equipo y el backend procesa el archivo recibido.
+
+## Producción
+
+Antes de publicar:
+
+- Configura `NODE_ENV=production`.
+- Usa un `JWT_SECRET` fuerte y único.
+- Configura `DATABASE_URL` con la base real.
+- Configura `FRONTEND_URL` con el dominio del frontend publicado.
+- Configura `VITE_API_URL` con la URL pública del backend, terminando en `/api`.
+- En Google Cloud agrega el callback productivo en `GOOGLE_OAUTH_REDIRECT_URI`.
+- Ejecuta `npm run build` en `frontend` y sirve `frontend/dist`.
+- Ejecuta el backend con `npm run start` bajo PM2, systemd o el servicio del hosting.
+- Programa respaldo diario de PostgreSQL antes de activar sincronización automática.
 
 ## Automatizacion Drive
 
