@@ -41,9 +41,9 @@ export const DashboardJefeComercial = ({ activeSection = 'ventas' }) => {
         <SummaryCard label="Cumplimiento global" value={percent(cumplimientoGlobal)} />
         <SummaryCard label="Almacenes con meta" value={data.cumplimiento.length} />
       </div>
-      <MonthlySalesChart data={data.historial} />
       <GoalComplianceTable rows={data.cumplimiento} />
       <GoalProgressChart data={data.cumplimiento} />
+      <MonthlySalesChart data={data.historial} />
     </div>
   );
 
