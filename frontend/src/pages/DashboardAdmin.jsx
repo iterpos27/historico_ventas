@@ -11,7 +11,6 @@ import { SummaryCard } from '../components/SummaryCard.jsx';
 import { SyncHistoryTable } from '../components/SyncHistoryTable.jsx';
 import { GoalProgressChart } from '../components/charts/GoalProgressChart.jsx';
 import { MonthlySalesChart } from '../components/charts/MonthlySalesChart.jsx';
-import { SalesBarChart } from '../components/charts/SalesBarChart.jsx';
 import { useApi } from '../hooks/useApi.js';
 import { money, percent } from '../utils/format.js';
 
@@ -108,12 +107,6 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
   const sales = (
     <div className="space-y-5">
       <PeriodFilter value={period} onChange={setPeriod} />
-      <div className="grid gap-4 md:grid-cols-4">
-        <SummaryCard label="Total general de ventas" value={money(data.total.total)} helper={period} />
-        <SummaryCard label="Meta global" value={money(metaGlobal)} helper="Suma de metas activas" />
-        <SummaryCard label="Cumplimiento global" value={percent(cumplimientoGlobal)} />
-        <SummaryCard label="Almacenes activos" value={data.branches.filter((branch) => branch.estado).length} />
-      </div>
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-brandDark">Ventas por almacén</h3>
@@ -152,12 +145,15 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
           {importResult.errors.length} filas no se importaron porque el almacén no existe o el dato es inválido.
         </div>
       ) : null}
-      <div className="grid gap-6 xl:grid-cols-2">
-        <SalesBarChart data={data.ventasPorAlmacen} compliance={data.cumplimiento} />
-        <GoalProgressChart data={data.cumplimiento} />
+      <div className="grid gap-4 md:grid-cols-4">
+        <SummaryCard label="Total general de ventas" value={money(data.total.total)} helper={period} />
+        <SummaryCard label="Meta global" value={money(metaGlobal)} helper="Suma de metas activas" />
+        <SummaryCard label="Cumplimiento global" value={percent(cumplimientoGlobal)} />
+        <SummaryCard label="Almacenes activos" value={data.branches.filter((branch) => branch.estado).length} />
       </div>
-      <MonthlySalesChart data={data.historial} />
+      <GoalProgressChart data={data.cumplimiento} />
       <GoalComplianceTable rows={data.cumplimiento} title="Ventas vs meta por almacén" />
+      <MonthlySalesChart data={data.historial} />
       <SyncHistoryTable rows={data.syncHistory} />
       {importModalOpen ? (
         <Modal title="Importar Excel de ventas" onClose={() => setImportModalOpen(false)}>
