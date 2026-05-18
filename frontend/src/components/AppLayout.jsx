@@ -1,10 +1,9 @@
 import React, { useMemo, useState } from 'react';
-import { BarChart3, Building2, Gauge, LogOut, Target, Users } from 'lucide-react';
+import { BarChart3, Building2, LogOut, Target, Users } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const menuByRole = {
   admin: [
-    { id: 'resumen', label: 'Resumen', icon: Gauge },
     { id: 'ventas', label: 'Ventas', icon: BarChart3 },
     { id: 'usuarios', label: 'Usuarios', icon: Users },
     { id: 'almacenes', label: 'Almacenes', icon: Building2 },
@@ -21,7 +20,7 @@ const menuByRole = {
 export const AppLayout = ({ children }) => {
   const { user, logout } = useAuth();
   const menu = menuByRole[user.rol] || [];
-  const [activeSection, setActiveSection] = useState(menu[0]?.id || 'resumen');
+  const [activeSection, setActiveSection] = useState(menu[0]?.id || 'ventas');
   const activeItem = useMemo(
     () => menu.find((item) => item.id === activeSection) || menu[0],
     [activeSection, menu]

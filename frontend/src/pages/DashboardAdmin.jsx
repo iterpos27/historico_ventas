@@ -6,7 +6,6 @@ import { ErrorMessage } from '../components/ErrorMessage.jsx';
 import { GoalComplianceTable } from '../components/GoalComplianceTable.jsx';
 import { LoadingState } from '../components/LoadingState.jsx';
 import { Modal } from '../components/Modal.jsx';
-import { MonthlyHistoryTable } from '../components/MonthlyHistoryTable.jsx';
 import { PeriodFilter } from '../components/PeriodFilter.jsx';
 import { SummaryCard } from '../components/SummaryCard.jsx';
 import { SyncHistoryTable } from '../components/SyncHistoryTable.jsx';
@@ -38,7 +37,7 @@ const loadAdminData = async (period) => {
   return { total, ventasPorAlmacen, cumplimiento, branches, goals, users, historial, syncHistory };
 };
 
-export const DashboardAdmin = ({ activeSection = 'resumen' }) => {
+export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
   const [period, setPeriod] = useState(currentPeriod());
   const { data, loading, error, reload } = useApi(() => loadAdminData(period), [period]);
   const [syncMessage, setSyncMessage] = useState('');
@@ -106,8 +105,8 @@ export const DashboardAdmin = ({ activeSection = 'resumen' }) => {
   const ventasGlobales = data.cumplimiento.reduce((sum, row) => sum + Number(row.ventas_periodo || 0), 0);
   const cumplimientoGlobal = metaGlobal ? (ventasGlobales / metaGlobal) * 100 : 0;
 
-  const summary = (
-    <div className="space-y-6">
+  const sales = (
+    <div className="space-y-5">
       <PeriodFilter value={period} onChange={setPeriod} />
       <div className="grid gap-4 md:grid-cols-4">
         <SummaryCard label="Total general de ventas" value={money(data.total.total)} helper={period} />
@@ -115,19 +114,6 @@ export const DashboardAdmin = ({ activeSection = 'resumen' }) => {
         <SummaryCard label="Cumplimiento global" value={percent(cumplimientoGlobal)} />
         <SummaryCard label="Almacenes activos" value={data.branches.filter((branch) => branch.estado).length} />
       </div>
-      <div className="grid gap-6 xl:grid-cols-2">
-        <SalesBarChart data={data.ventasPorAlmacen} compliance={data.cumplimiento} />
-        <GoalProgressChart data={data.cumplimiento} />
-      </div>
-      <MonthlySalesChart data={data.historial} />
-      <GoalComplianceTable rows={data.cumplimiento} />
-      <MonthlyHistoryTable rows={data.historial} />
-    </div>
-  );
-
-  const sales = (
-    <div className="space-y-5">
-      <PeriodFilter value={period} onChange={setPeriod} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-brandDark">Ventas por almacén</h3>
@@ -166,7 +152,10 @@ export const DashboardAdmin = ({ activeSection = 'resumen' }) => {
           {importResult.errors.length} filas no se importaron porque el almacén no existe o el dato es inválido.
         </div>
       ) : null}
-      <GoalProgressChart data={data.cumplimiento} />
+      <div className="grid gap-6 xl:grid-cols-2">
+        <SalesBarChart data={data.ventasPorAlmacen} compliance={data.cumplimiento} />
+        <GoalProgressChart data={data.cumplimiento} />
+      </div>
       <MonthlySalesChart data={data.historial} />
       <GoalComplianceTable rows={data.cumplimiento} title="Ventas vs meta por almacén" />
       <SyncHistoryTable rows={data.syncHistory} />
@@ -269,12 +258,11 @@ export const DashboardAdmin = ({ activeSection = 'resumen' }) => {
   );
 
   const sections = {
-    resumen: summary,
     ventas: sales,
     usuarios: <AdminPanel section="usuarios" branches={data.branches} goals={data.goals} users={data.users} onRefresh={reload} />,
     almacenes: <AdminPanel section="almacenes" branches={data.branches} goals={data.goals} users={data.users} onRefresh={reload} />,
     metas: goals
   };
 
-  return sections[activeSection] || summary;
+  return sections[activeSection] || sales;
 };
