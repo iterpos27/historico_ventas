@@ -60,6 +60,7 @@ PORT=4000
 NODE_ENV=development
 FRONTEND_URL=http://localhost:5173
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/ventas_almacenes
+DB_SSL=false
 JWT_SECRET=cambia_este_secreto
 
 GOOGLE_DRIVE_FOLDER_ID=
@@ -111,6 +112,7 @@ Antes de publicar:
 - Configura `NODE_ENV=production`.
 - Usa un `JWT_SECRET` fuerte y único.
 - Configura `DATABASE_URL` con la base real.
+- En Supabase usa `DB_SSL=true` si tu cadena no trae `sslmode=require`.
 - Configura `FRONTEND_URL` con el dominio del frontend publicado.
 - Configura `VITE_API_URL` con la URL pública del backend, terminando en `/api`.
 - En Google Cloud agrega el callback productivo en `GOOGLE_OAUTH_REDIRECT_URI`.

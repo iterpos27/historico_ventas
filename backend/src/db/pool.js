@@ -4,7 +4,8 @@ import { env } from '../config/env.js';
 const { Pool } = pg;
 
 export const pool = new Pool({
-  connectionString: env.databaseUrl
+  connectionString: env.databaseUrl,
+  ssl: env.databaseSsl ? { rejectUnauthorized: false } : undefined
 });
 
 export const query = (text, params) => pool.query(text, params);

@@ -16,6 +16,7 @@ export const env = {
   nodeEnv: process.env.NODE_ENV || 'development',
   port: process.env.PORT || 4000,
   databaseUrl: process.env.DATABASE_URL,
+  databaseSsl: process.env.DB_SSL === 'true' || process.env.DATABASE_URL?.includes('sslmode=require'),
   jwtSecret: process.env.JWT_SECRET || 'dev-secret-change-me',
   googleSheetId: process.env.GOOGLE_SHEET_ID,
   googleDriveFileId: process.env.GOOGLE_DRIVE_FILE_ID,
