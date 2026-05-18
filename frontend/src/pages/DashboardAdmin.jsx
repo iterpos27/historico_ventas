@@ -186,20 +186,31 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
 
   const goals = (
     <div className="space-y-5">
-      <PeriodFilter value={period} onChange={setPeriod} />
-      <GoalProgressChart data={data.cumplimiento} />
-      <GoalComplianceTable rows={data.cumplimiento} />
-      <div className="flex justify-end">
-        <button
-          type="button"
-          onClick={() => {
-            setCopyGoalsForm({ from_period: previousPeriod(period), to_period: period, overwrite: false });
-            setCopyGoalsModalOpen(true);
-          }}
-          className="rounded-md border border-brand px-4 py-2 text-sm font-semibold text-brandDark"
-        >
-          Copiar metas de otro mes
-        </button>
+      <div className="rounded-lg border border-blue-100 bg-white p-4 shadow-sm">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-brandDark">Metas comerciales</h3>
+            <p className="text-sm text-slate-500">Administra metas mensuales por almacén para el periodo seleccionado.</p>
+          </div>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+            <input
+              type="month"
+              value={period}
+              onChange={(event) => setPeriod(event.target.value)}
+              className="rounded-md border border-blue-200 bg-softBlue px-3 py-2 text-sm font-semibold text-brandDark outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+            />
+            <button
+              type="button"
+              onClick={() => {
+                setCopyGoalsForm({ from_period: previousPeriod(period), to_period: period, overwrite: false });
+                setCopyGoalsModalOpen(true);
+              }}
+              className="rounded-md border border-brand px-4 py-2 text-sm font-semibold text-brandDark"
+            >
+              Copiar metas de otro mes
+            </button>
+          </div>
+        </div>
       </div>
       {syncMessage ? <div className="rounded-md border border-blue-200 bg-softBlue px-4 py-3 text-sm text-brandDark">{syncMessage}</div> : null}
       <ErrorMessage message={syncError} />
