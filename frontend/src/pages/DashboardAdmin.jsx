@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link, RefreshCw } from 'lucide-react';
-import { api } from '../api/client';
+import { API_URL, api } from '../api/client';
 import { AdminPanel } from '../components/AdminPanel.jsx';
 import { ErrorMessage } from '../components/ErrorMessage.jsx';
 import { GoalComplianceTable } from '../components/GoalComplianceTable.jsx';
@@ -42,7 +42,7 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
   const [syncMessage, setSyncMessage] = useState('');
   const [syncError, setSyncError] = useState('');
   const [importModalOpen, setImportModalOpen] = useState(false);
-  const [excelPath, setExcelPath] = useState('C:/Users/Essart Sistemas/OneDrive/Documentos/DATA_PRUEBA.xlsx');
+  const [excelFile, setExcelFile] = useState(null);
   const [importResult, setImportResult] = useState(null);
   const [replacePeriod, setReplacePeriod] = useState(false);
   const [copyGoalsModalOpen, setCopyGoalsModalOpen] = useState(false);
@@ -63,19 +63,36 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
   };
 
   const connectGoogle = () => {
-    window.open('http://localhost:4000/api/auth/google', '_blank', 'noopener,noreferrer');
+    window.open(`${API_URL}/auth/google`, '_blank', 'noopener,noreferrer');
   };
+
+  const fileToBase64 = (file) => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result).split(',').pop());
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo'));
+    reader.readAsDataURL(file);
+  });
 
   const importExcel = async (event) => {
     event.preventDefault();
     setSyncMessage('');
     setSyncError('');
     setImportResult(null);
+    if (!excelFile) {
+      setSyncError('Selecciona un archivo Excel para importar');
+      return;
+    }
     try {
-      const result = await api.post('/sync/excel', { file_path: excelPath, replace_period: replacePeriod });
+      const fileBase64 = await fileToBase64(excelFile);
+      const result = await api.post('/sync/excel', {
+        file_name: excelFile.name,
+        file_base64: fileBase64,
+        replace_period: replacePeriod
+      });
       setImportResult(result);
       const replacement = result.replaced ? ` ${result.replaced} ventas anteriores respaldadas y reemplazadas.` : '';
       setSyncMessage(`Excel importado: ${result.inserted} insertadas, ${result.skipped} duplicadas.${replacement}`);
+      setExcelFile(null);
       await reload();
     } catch (err) {
       setSyncError(err.message);
@@ -159,11 +176,12 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
         <Modal title="Importar Excel de ventas" onClose={() => setImportModalOpen(false)}>
           <form onSubmit={importExcel} className="space-y-4">
             <label className="grid gap-1 text-sm font-medium text-slate-700">
-              Ruta del archivo en este equipo
+              Archivo Excel
               <input
-                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
-                value={excelPath}
-                onChange={(event) => setExcelPath(event.target.value)}
+                className="rounded-md border border-slate-300 px-3 py-2 text-sm outline-none file:mr-3 file:rounded-md file:border-0 file:bg-brand file:px-3 file:py-2 file:text-sm file:font-semibold file:text-white focus:border-brand focus:ring-2 focus:ring-brand/20"
+                type="file"
+                accept=".xls,.xlsx,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                onChange={(event) => setExcelFile(event.target.files?.[0] || null)}
                 required
               />
             </label>

@@ -16,5 +16,6 @@ export const env = {
   googleOAuthRedirectUri: process.env.GOOGLE_OAUTH_REDIRECT_URI || 'http://localhost:4000/api/auth/google/callback',
   googleDriveAutoSync: process.env.GOOGLE_DRIVE_AUTO_SYNC === 'true',
   googleDriveAutoSyncMinutes: Number(process.env.GOOGLE_DRIVE_AUTO_SYNC_MINUTES || 15),
-  googleDriveAutoSyncReplacePeriod: process.env.GOOGLE_DRIVE_AUTO_SYNC_REPLACE_PERIOD === 'true'
+  googleDriveAutoSyncReplacePeriod: process.env.GOOGLE_DRIVE_AUTO_SYNC_REPLACE_PERIOD === 'true',
+  frontendUrl: process.env.FRONTEND_URL
 };

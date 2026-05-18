@@ -2,6 +2,7 @@ import cors from 'cors';
 import express from 'express';
 import helmet from 'helmet';
 import morgan from 'morgan';
+import { env } from './config/env.js';
 import * as authController from './controllers/authController.js';
 import { authenticate } from './middlewares/auth.js';
 import { errorHandler } from './middlewares/errorHandler.js';
@@ -15,8 +16,8 @@ import { userRoutes } from './routes/userRoutes.js';
 export const app = express();
 
 app.use(helmet());
-app.use(cors());
-app.use(express.json());
+app.use(cors(env.frontendUrl ? { origin: env.frontendUrl } : undefined));
+app.use(express.json({ limit: '25mb' }));
 app.use(morgan('dev'));
 
 app.get('/api/health', (_req, res) => res.json({ ok: true }));
