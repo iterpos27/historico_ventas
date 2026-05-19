@@ -6,3 +6,4 @@ frontend/.env
 backend/storage/google-token.json
 backend/storage/*
 !backend/storage/.gitkeep
+backups/

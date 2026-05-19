@@ -2,7 +2,7 @@ import { google } from 'googleapis';
 import { env } from '../config/env.js';
 import { AppError } from '../utils/errors.js';
 import { getAuthorizedOAuthClient } from './googleOAuthService.js';
-import { importExcelSalesBuffer } from './salesImportService.js';
+import { importExcelSalesBuffer, MATRIX_SOURCE } from './salesImportService.js';
 
 const googleSheetMime = 'application/vnd.google-apps.spreadsheet';
 const xlsxMime = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
@@ -92,7 +92,7 @@ export const syncGoogleDriveSales = async (options = {}) => {
   }
 
   try {
-    const result = await importExcelSalesBuffer(buffer, 'google_drive_matrix', {
+    const result = await importExcelSalesBuffer(buffer, MATRIX_SOURCE, {
       replacePeriod: options.replacePeriod
     });
     return {

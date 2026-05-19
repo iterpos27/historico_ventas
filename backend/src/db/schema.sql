@@ -79,6 +79,13 @@ CREATE TABLE IF NOT EXISTS sync_runs (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS app_settings (
+  key TEXT PRIMARY KEY,
+  value JSONB NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+);
+
 CREATE INDEX IF NOT EXISTS idx_ventas_fecha ON ventas(fecha);
 CREATE INDEX IF NOT EXISTS idx_ventas_almacen_fecha ON ventas(almacen_id, fecha);
 CREATE INDEX IF NOT EXISTS idx_metas_periodo ON metas(periodo);
@@ -111,4 +118,8 @@ FOR EACH ROW EXECUTE FUNCTION set_updated_at();
 
 DROP TRIGGER IF EXISTS trg_metas_updated_at ON metas;
 CREATE TRIGGER trg_metas_updated_at BEFORE UPDATE ON metas
+FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+
+DROP TRIGGER IF EXISTS trg_app_settings_updated_at ON app_settings;
+CREATE TRIGGER trg_app_settings_updated_at BEFORE UPDATE ON app_settings
 FOR EACH ROW EXECUTE FUNCTION set_updated_at();

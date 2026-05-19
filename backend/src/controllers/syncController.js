@@ -1,6 +1,6 @@
 import { syncGoogleDriveSales } from '../services/googleDriveService.js';
 import { syncGoogleSheetSales } from '../services/googleSheetsService.js';
-import { importExcelSalesBuffer } from '../services/salesImportService.js';
+import { importExcelSalesBuffer, MATRIX_SOURCE } from '../services/salesImportService.js';
 import { createSyncRun, listSyncRuns } from '../services/syncLogService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/errors.js';
@@ -47,7 +47,7 @@ export const importExcel = asyncHandler(async (req, res) => {
     const buffer = Buffer.from(cleanBase64, 'base64');
     if (!buffer.length) throw new AppError('El archivo está vacío o no se pudo leer');
 
-    const result = await importExcelSalesBuffer(buffer, 'excel_upload_matrix', { replacePeriod });
+    const result = await importExcelSalesBuffer(buffer, MATRIX_SOURCE, { replacePeriod });
     await createSyncRun({
       tipo: replacePeriod ? 'excel_upload_replace' : 'excel_upload',
       estado: 'ok',

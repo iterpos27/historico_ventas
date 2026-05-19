@@ -6,6 +6,8 @@ import { pool } from '../db/pool.js';
 import { periodToDateRange } from '../utils/period.js';
 
 const ORANGE_RGB = 'F79646';
+export const MATRIX_SOURCE = 'ventas_matrix';
+const MATRIX_SOURCES = [MATRIX_SOURCE, 'google_drive_matrix', 'excel_upload_matrix', 'excel_matrix'];
 
 const normalizeText = (value) => String(value ?? '').trim();
 const normalizeKey = (value) => normalizeText(value)
@@ -226,15 +228,21 @@ export const summarizeByBranchName = (records) => records.reduce((acc, record) =
   return acc;
 }, {});
 
+const getSourceFilter = (source, params) => {
+  if (!source) return '';
+  if (source === MATRIX_SOURCE) {
+    params.push(MATRIX_SOURCES);
+    return ` AND fuente = ANY($${params.length})`;
+  }
+
+  params.push(source);
+  return ` AND fuente = $${params.length}`;
+};
+
 const backupAndDeleteSalesForPeriod = async (client, period, source) => {
   const { start, end } = periodToDateRange(period);
   const params = [start, end];
-  let sourceFilter = '';
-
-  if (source) {
-    params.push(source);
-    sourceFilter = ` AND fuente = $${params.length}`;
-  }
+  const sourceFilter = getSourceFilter(source, params);
 
   const existing = await client.query(
     `SELECT id, fecha, almacen_id, producto, cantidad, precio_unitario, total, fuente, external_hash, created_at, updated_at
@@ -274,7 +282,7 @@ export const importSalesRecords = async (records, source, options = {}) => {
   try {
     await client.query('BEGIN');
 
-    if (options.replacePeriod && options.period) {
+    if ((options.replacePeriod || source === MATRIX_SOURCE) && options.period) {
       result.replaced = await backupAndDeleteSalesForPeriod(client, options.period, source);
     }
 
@@ -314,8 +322,25 @@ export const importSalesRecords = async (records, source, options = {}) => {
         continue;
       }
 
+      if (source === MATRIX_SOURCE) {
+        const duplicate = await client.query(
+          `SELECT id FROM ventas
+           WHERE fecha = $1
+             AND almacen_id = $2
+             AND producto = $3
+             AND total = $4
+             AND fuente = ANY($5)
+           LIMIT 1`,
+          [record.fecha, branch.rows[0].id, record.producto, record.total, MATRIX_SOURCES]
+        );
+
+        if (duplicate.rowCount) {
+          result.skipped += 1;
+          continue;
+        }
+      }
+
       const externalHash = hashRecord({
-        source,
         fecha: record.fecha,
         establecimiento: record.establecimiento,
         documento: record.documento,
@@ -358,7 +383,7 @@ export const importSalesRecords = async (records, source, options = {}) => {
 export const importExcelSales = async (filePath, options = {}) => {
   const matrix = parseMatrixSalesWorkbook(filePath);
   if (matrix?.records?.length) {
-    const result = await importSalesRecords(matrix.records, 'excel_matrix', {
+    const result = await importSalesRecords(matrix.records, MATRIX_SOURCE, {
       replacePeriod: options.replacePeriod,
       period: matrix.period
     });
@@ -387,7 +412,7 @@ export const importExcelSales = async (filePath, options = {}) => {
   };
 };
 
-export const importExcelSalesBuffer = async (buffer, source = 'google_drive_matrix', options = {}) => {
+export const importExcelSalesBuffer = async (buffer, source = MATRIX_SOURCE, options = {}) => {
   const textStart = buffer.subarray(0, 2000).toString('utf8');
   if (textStart.includes('<frameset') && textStart.includes('sheet001.htm')) {
     throw new Error('El archivo es un Excel HTML con hojas auxiliares y solo se subió el contenedor .xls. Exporta o guarda el reporte como Excel completo .xlsx/.xls real, o sube también la carpeta _archivos no soportada por Drive.');
