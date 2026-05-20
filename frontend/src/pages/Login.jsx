@@ -66,15 +66,6 @@ export const Login = () => {
               </button>
             </div>
           </label>
-          <label className="flex items-center gap-2 text-sm font-semibold text-slate-600">
-            <input
-              type="checkbox"
-              checked={showPassword}
-              onChange={(event) => setShowPassword(event.target.checked)}
-              className="h-4 w-4 rounded border-slate-300 text-brand focus:ring-brand"
-            />
-            Mostrar contraseña
-          </label>
           <ErrorMessage message={error} />
           <button
             type="submit"
