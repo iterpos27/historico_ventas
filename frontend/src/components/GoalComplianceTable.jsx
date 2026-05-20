@@ -64,7 +64,7 @@ export const GoalComplianceTable = ({ rows = [], title = 'Cumplimiento comercial
             </article>
           );
         })}
-        <div className="bg-accent p-3 text-sm text-white">
+        <div className="bg-brandDark p-3 text-sm text-white">
           <div className="flex items-center justify-between gap-3">
             <span className="font-bold">Total</span>
             <span className="font-bold">{money(totals.ventas)}</span>
@@ -106,7 +106,7 @@ export const GoalComplianceTable = ({ rows = [], title = 'Cumplimiento comercial
                 </tr>
               );
             })}
-            <tr className="bg-accent text-white">
+            <tr className="bg-brandDark text-white">
               <td className="px-3 py-2 font-bold">Total</td>
               <td className="px-3 py-2 text-right font-bold">{money(totals.ventas)}</td>
               <td className="px-3 py-2 text-right font-bold">{money(totals.meta)}</td>

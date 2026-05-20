@@ -87,3 +87,18 @@ export const deactivateUser = async (id) => {
   if (!rows[0]) throw notFound('Usuario no encontrado');
   return rows[0];
 };
+
+export const deleteUser = async (id, currentUserId) => {
+  if (id === currentUserId) {
+    throw new AppError('No puedes eliminar tu propio usuario');
+  }
+
+  const { rows } = await query(
+    `DELETE FROM usuarios
+     WHERE id = $1
+     RETURNING id, nombre, username, email, rol, almacen_id, estado`,
+    [id]
+  );
+  if (!rows[0]) throw notFound('Usuario no encontrado');
+  return rows[0];
+};

@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Edit, Plus, Power } from 'lucide-react';
+import { Edit, Plus, Power, Trash2 } from 'lucide-react';
 import { api } from '../api/client';
 import { money } from '../utils/format.js';
 import { DataTable } from './DataTable.jsx';
@@ -115,6 +115,21 @@ export const AdminPanel = ({ section, branches = [], goals = [], users = [], onR
     }
   };
 
+  const remove = async (row) => {
+    setError('');
+    setMessage('');
+    const confirmed = window.confirm(`¿Eliminar definitivamente el usuario ${row.nombre}? Esta acción no se puede deshacer.`);
+    if (!confirmed) return;
+
+    try {
+      await api.delete(`/${section}/${row.id}`);
+      setMessage(`${currentTitle.charAt(0).toUpperCase()}${currentTitle.slice(1)} eliminado`);
+      await onRefresh();
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const renderForm = () => (
     <form onSubmit={save} className="grid gap-4">
       {section === 'usuarios' ? (
@@ -219,6 +234,11 @@ export const AdminPanel = ({ section, branches = [], goals = [], users = [], onR
         ) : (
           <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-500">Inactivo</span>
         )}
+        {section === 'usuarios' ? (
+          <button onClick={() => remove(row)} className="grid h-8 w-8 place-items-center rounded-md bg-slate-100 text-slate-600" title="Eliminar">
+            <Trash2 size={16} />
+          </button>
+        ) : null}
       </div>
     )
   };

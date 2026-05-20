@@ -9,3 +9,4 @@ userRoutes.get('/', userController.list);
 userRoutes.post('/', userController.create);
 userRoutes.put('/:id', userController.update);
 userRoutes.patch('/:id/desactivar', userController.deactivate);
+userRoutes.delete('/:id', userController.remove);

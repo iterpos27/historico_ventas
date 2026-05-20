@@ -5,3 +5,4 @@ export const list = asyncHandler(async (_req, res) => res.json(await userService
 export const create = asyncHandler(async (req, res) => res.status(201).json(await userService.createUser(req.body)));
 export const update = asyncHandler(async (req, res) => res.json(await userService.updateUser(req.params.id, req.body)));
 export const deactivate = asyncHandler(async (req, res) => res.json(await userService.deactivateUser(req.params.id)));
+export const remove = asyncHandler(async (req, res) => res.json(await userService.deleteUser(req.params.id, req.user.id)));
