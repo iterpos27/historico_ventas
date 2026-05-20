@@ -35,7 +35,7 @@ export const DashboardJefeComercial = ({ activeSection = 'ventas' }) => {
   const ventas = (
     <div className="space-y-6">
       <PeriodFilter value={period} onChange={setPeriod} />
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         <SummaryCard label="Total global de ventas" value={money(data.total.total)} helper={period} />
         <SummaryCard label="Meta global" value={money(metaGlobal)} />
         <SummaryCard label="Cumplimiento global" value={percent(cumplimientoGlobal)} />

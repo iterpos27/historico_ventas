@@ -31,7 +31,7 @@ export const AppLayout = ({ children }) => {
     : children;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 pb-20 lg:pb-0">
       <aside className="fixed inset-y-0 left-0 hidden w-72 bg-brandDark px-4 py-6 text-white shadow-xl lg:block">
         <div>
           <div className="flex items-center gap-3">
@@ -79,13 +79,29 @@ export const AppLayout = ({ children }) => {
       </aside>
 
       <main className="lg:pl-72">
-        <header className="border-b border-blue-100 bg-white px-5 py-4 lg:px-8">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div>
-              <p className="text-sm font-medium text-slate-500">{user.rol.replace('_', ' ')}</p>
-              <h2 className="text-xl font-semibold text-brandDark">{activeItem?.label || 'Dashboard'}</h2>
+        <header className="sticky top-0 z-30 border-b border-blue-100 bg-white/95 px-4 py-3 backdrop-blur lg:px-8 lg:py-4">
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brandDark text-xs font-black text-white ring-4 ring-blue-100 lg:hidden">
+                  CR
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-medium text-slate-500 sm:text-sm">{user.rol.replace('_', ' ')}</p>
+                  <h2 className="truncate text-lg font-semibold leading-tight text-brandDark sm:text-xl">{activeItem?.label || 'Dashboard'}</h2>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={logout}
+                className="grid h-10 w-10 shrink-0 place-items-center rounded-md bg-red-50 text-accent lg:hidden"
+                aria-label="Salir"
+                title="Salir"
+              >
+                <LogOut size={18} />
+              </button>
             </div>
-            <div className="flex gap-2 overflow-x-auto lg:hidden">
+            <div className="hidden gap-2 overflow-x-auto pb-1 lg:hidden">
               {menu.map((item) => (
                 <button
                   key={item.id}
@@ -101,8 +117,30 @@ export const AppLayout = ({ children }) => {
             </div>
           </div>
         </header>
-        <div className="p-5 lg:p-8">{enhancedChildren}</div>
+        <div className="p-4 sm:p-5 lg:p-8">{enhancedChildren}</div>
       </main>
+
+      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-blue-100 bg-white px-2 py-2 shadow-[0_-10px_30px_rgba(15,23,42,0.12)] lg:hidden">
+        <div className="grid" style={{ gridTemplateColumns: `repeat(${Math.max(menu.length, 1)}, minmax(0, 1fr))` }}>
+          {menu.map((item) => {
+            const Icon = item.icon;
+            const active = item.id === activeSection;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setActiveSection(item.id)}
+                className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-md px-1 text-[11px] font-semibold leading-tight ${
+                  active ? 'bg-brand text-white' : 'text-brandDark'
+                }`}
+              >
+                <Icon size={18} />
+                <span className="line-clamp-2">{item.label}</span>
+              </button>
+            );
+          })}
+        </div>
+      </nav>
     </div>
   );
 };

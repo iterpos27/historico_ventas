@@ -28,7 +28,54 @@ export const GoalComplianceTable = ({ rows = [], title = 'Cumplimiento comercial
           Meta global: {money(totals.meta)} | {percent(cumplimientoGlobal)}
         </div>
       </div>
-      <div className="overflow-x-auto">
+      <div className="divide-y divide-blue-100 sm:hidden">
+        {rows.map((row) => {
+          const ventas = numeric(row.ventas_periodo);
+          const meta = numeric(row.monto_meta);
+          const falta = Math.max(meta - ventas, 0);
+          const excedente = Math.max(ventas - meta, 0);
+          const cumplimiento = numeric(row.cumplimiento);
+
+          return (
+            <article key={row.almacen_id} className="p-3">
+              <div className="mb-2">
+                <p className="text-sm font-bold text-brandDark">{row.nomenclatura || row.nombre}</p>
+              </div>
+              <dl className="grid grid-cols-2 gap-1.5">
+                <div className="rounded-md bg-slate-50 px-2.5 py-1.5">
+                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Venta</dt>
+                  <dd className="mt-1 text-xs font-bold text-slate-900">{money(ventas)}</dd>
+                </div>
+                <div className="rounded-md bg-slate-50 px-2.5 py-1.5">
+                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Meta</dt>
+                  <dd className="mt-1 text-xs font-semibold text-slate-700">{money(meta)}</dd>
+                </div>
+                <div className="rounded-md bg-slate-50 px-2.5 py-1.5">
+                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">% Cumplimiento</dt>
+                  <dd className={`mt-1 text-xs font-bold ${complianceClass(cumplimiento)}`}>{percent(cumplimiento)}</dd>
+                </div>
+                <div className="rounded-md bg-slate-50 px-2.5 py-1.5">
+                  <dt className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">{excedente > 0 ? 'Sobrepaso' : 'Falta'}</dt>
+                  <dd className={`mt-1 text-xs font-semibold ${excedente > 0 ? 'text-emerald-600' : 'text-orange-600'}`}>
+                    {money(excedente > 0 ? excedente : falta)}
+                  </dd>
+                </div>
+              </dl>
+            </article>
+          );
+        })}
+        <div className="bg-accent p-3 text-sm text-white">
+          <div className="flex items-center justify-between gap-3">
+            <span className="font-bold">Total</span>
+            <span className="font-bold">{money(totals.ventas)}</span>
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+            <span>Meta: {money(totals.meta)}</span>
+            <span className="text-right">{percent(cumplimientoGlobal)}</span>
+          </div>
+        </div>
+      </div>
+      <div className="hidden overflow-x-auto sm:block">
         <table className="min-w-full border-collapse text-sm">
           <thead>
             <tr className="bg-brand text-white">

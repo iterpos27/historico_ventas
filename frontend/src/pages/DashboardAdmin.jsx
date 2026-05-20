@@ -137,7 +137,7 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
           <button onClick={() => setImportModalOpen(true)} className="flex items-center justify-center gap-2 rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white">
             Importar Excel
           </button>
-          <button onClick={syncDrive} className="flex items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white">
+          <button onClick={syncDrive} className="flex items-center justify-center gap-2 rounded-md bg-brandDark px-4 py-2 text-sm font-semibold text-white">
             <RefreshCw size={18} />
             Sincronizar Drive
           </button>
@@ -162,14 +162,14 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
           {importResult.errors.length} filas no se importaron porque el almacén no existe o el dato es inválido.
         </div>
       ) : null}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         <SummaryCard label="Total general de ventas" value={money(data.total.total)} helper={period} />
         <SummaryCard label="Meta global" value={money(metaGlobal)} helper="Suma de metas activas" />
         <SummaryCard label="Cumplimiento global" value={percent(cumplimientoGlobal)} />
         <SummaryCard label="Almacenes activos" value={data.branches.filter((branch) => branch.estado).length} />
       </div>
-      <GoalProgressChart data={data.cumplimiento} />
       <GoalComplianceTable rows={data.cumplimiento} title="Ventas vs meta por almacén" />
+      <GoalProgressChart data={data.cumplimiento} />
       <MonthlySalesChart data={data.historial} />
       <SyncHistoryTable rows={data.syncHistory} />
       {importModalOpen ? (

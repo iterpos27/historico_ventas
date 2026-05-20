@@ -32,10 +32,10 @@ export const SummaryCard = ({ label, value, helper, tone = 'default' }) => {
   const styles = tones[tone] || tones.default;
 
   return (
-    <div className={`rounded-lg border p-5 shadow-sm shadow-blue-950/5 ring-1 ring-white ${styles.card}`}>
-      <p className={`text-sm font-medium ${styles.label}`}>{label}</p>
-      <p className={`mt-2 text-2xl font-semibold ${styles.value}`}>{value}</p>
-    {helper ? <p className="mt-1 text-sm text-slate-500">{helper}</p> : null}
+    <div className={`rounded-lg border p-3 shadow-sm shadow-blue-950/5 ring-1 ring-white sm:p-5 ${styles.card}`}>
+      <p className={`text-xs font-medium leading-tight sm:text-sm ${styles.label}`}>{label}</p>
+      <p className={`mt-2 break-words text-lg font-semibold leading-tight sm:text-2xl ${styles.value}`}>{value}</p>
+      {helper ? <p className="mt-1 text-xs text-slate-500 sm:text-sm">{helper}</p> : null}
     </div>
   );
 };
