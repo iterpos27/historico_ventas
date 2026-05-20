@@ -10,6 +10,7 @@ import { authRoutes } from './routes/authRoutes.js';
 import { branchRoutes } from './routes/branchRoutes.js';
 import { goalRoutes } from './routes/goalRoutes.js';
 import { salesRoutes } from './routes/salesRoutes.js';
+import { statusRoutes } from './routes/statusRoutes.js';
 import { syncRoutes } from './routes/syncRoutes.js';
 import { userRoutes } from './routes/userRoutes.js';
 
@@ -28,6 +29,7 @@ app.use('/api/almacenes', branchRoutes);
 app.use('/api/metas', goalRoutes);
 app.use('/api/ventas', salesRoutes);
 app.use('/api/sync', syncRoutes);
+app.use('/api/status', statusRoutes);
 
 app.use((_req, res) => res.status(404).json({ message: 'Ruta no encontrada' }));
 app.use(errorHandler);

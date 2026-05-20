@@ -3,6 +3,15 @@ import { defineConfig } from 'vite';
 
 export default defineConfig({
   plugins: [react()],
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          charts: ['recharts']
+        }
+      }
+    }
+  },
   server: {
     port: 5173
   }

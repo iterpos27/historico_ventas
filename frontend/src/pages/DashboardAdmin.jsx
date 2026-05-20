@@ -4,11 +4,13 @@ import { API_URL, api } from '../api/client';
 import { AdminPanel } from '../components/AdminPanel.jsx';
 import { ErrorMessage } from '../components/ErrorMessage.jsx';
 import { GoalComplianceTable } from '../components/GoalComplianceTable.jsx';
+import { GoogleStatusBadge } from '../components/GoogleStatusBadge.jsx';
 import { LoadingState } from '../components/LoadingState.jsx';
 import { Modal } from '../components/Modal.jsx';
 import { PeriodFilter } from '../components/PeriodFilter.jsx';
 import { SummaryCard } from '../components/SummaryCard.jsx';
 import { SyncHistoryTable } from '../components/SyncHistoryTable.jsx';
+import { SystemStatusPanel } from '../components/SystemStatusPanel.jsx';
 import { GoalProgressChart } from '../components/charts/GoalProgressChart.jsx';
 import { MonthlySalesChart } from '../components/charts/MonthlySalesChart.jsx';
 import { useApi } from '../hooks/useApi.js';
@@ -128,6 +130,9 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
         <div>
           <h3 className="text-lg font-semibold text-brandDark">Ventas por almacén</h3>
           <p className="text-sm text-slate-500">Consulta ventas consolidadas y sincroniza información desde Google Drive.</p>
+          <div className="mt-2">
+            <GoogleStatusBadge />
+          </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">
           <button onClick={connectGoogle} className="flex items-center justify-center gap-2 rounded-md border border-brand px-4 py-2 text-sm font-semibold text-brandDark">
@@ -286,7 +291,8 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
     ventas: sales,
     usuarios: <AdminPanel section="usuarios" branches={data.branches} goals={data.goals} users={data.users} onRefresh={reload} />,
     almacenes: <AdminPanel section="almacenes" branches={data.branches} goals={data.goals} users={data.users} onRefresh={reload} />,
-    metas: goals
+    metas: goals,
+    estado: <SystemStatusPanel />
   };
 
   return sections[activeSection] || sales;

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { BarChart3, Building2, LogOut, Target, Users } from 'lucide-react';
+import { Activity, BarChart3, Building2, LogOut, Target, Users } from 'lucide-react';
+import { BrandLogo } from './BrandLogo.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
 const menuByRole = {
@@ -7,7 +8,8 @@ const menuByRole = {
     { id: 'ventas', label: 'Ventas', icon: BarChart3 },
     { id: 'usuarios', label: 'Usuarios', icon: Users },
     { id: 'almacenes', label: 'Almacenes', icon: Building2 },
-    { id: 'metas', label: 'Metas', icon: Target }
+    { id: 'metas', label: 'Metas', icon: Target },
+    { id: 'estado', label: 'Estado', icon: Activity }
   ],
   jefe_comercial: [
     { id: 'ventas', label: 'Ventas globales', icon: BarChart3 }
@@ -34,15 +36,7 @@ export const AppLayout = ({ children }) => {
     <div className="min-h-screen bg-slate-50 pb-20 lg:pb-0">
       <aside className="fixed inset-y-0 left-0 hidden w-72 bg-brandDark px-4 py-6 text-white shadow-xl lg:block">
         <div>
-          <div className="flex items-center gap-3">
-            <div className="grid h-12 w-12 place-items-center rounded-full bg-white text-sm font-black text-brandDark ring-4 ring-white/20">
-              CR
-            </div>
-            <div>
-              <h1 className="text-base font-semibold leading-tight">El Centro del Rulimán</h1>
-              <p className="text-xs font-medium uppercase tracking-wide text-blue-100">Control comercial</p>
-            </div>
-          </div>
+          <BrandLogo />
           <div className="mt-6 rounded-lg border border-white/10 bg-white/10 px-3 py-3">
             <p className="text-sm font-semibold">{user.nombre}</p>
             <p className="mt-1 text-xs text-blue-100">{user.rol.replace('_', ' ')}</p>
@@ -83,9 +77,7 @@ export const AppLayout = ({ children }) => {
           <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex items-center justify-between gap-3">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-brandDark text-xs font-black text-white ring-4 ring-blue-100 lg:hidden">
-                  CR
-                </div>
+                <BrandLogo compact className="lg:hidden" />
                 <div className="min-w-0">
                   <p className="truncate text-xs font-medium text-slate-500 sm:text-sm">{user.rol.replace('_', ' ')}</p>
                   <h2 className="truncate text-lg font-semibold leading-tight text-brandDark sm:text-xl">{activeItem?.label || 'Dashboard'}</h2>

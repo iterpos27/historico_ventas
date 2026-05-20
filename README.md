@@ -154,3 +154,11 @@ El formato actual se alimenta de la matriz de ventas con:
 - `Total`
 
 La fila final de total general no se suma como almacén. Solo se usa como referencia contra el total calculado.
+
+## Operación
+
+La guía operativa para subir archivos, corregir periodos y reconectar Google está en:
+
+```txt
+docs/OPERACION.md
+```
