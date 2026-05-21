@@ -7,7 +7,19 @@ const userSelect = `
   a.nombre AS almacen_nombre, a.nomenclatura AS almacen_nomenclatura
 `;
 
-const validateUserPayload = ({ rol, almacen_id }) => {
+const validateUserPayload = ({ nombre, username, email, password, rol, almacen_id }, { requirePassword = false } = {}) => {
+  if (!String(nombre || '').trim() || String(nombre).length > 120) {
+    throw new AppError('El nombre es requerido y no debe superar 120 caracteres');
+  }
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(String(email || '')) || String(email).length > 180) {
+    throw new AppError('Email inválido');
+  }
+  if (username && String(username).length > 80) {
+    throw new AppError('El nombre de usuario no debe superar 80 caracteres');
+  }
+  if ((requirePassword || password) && String(password || '').length < 8) {
+    throw new AppError('La contraseña debe tener al menos 8 caracteres');
+  }
   if (!['admin', 'jefe_comercial', 'almacen'].includes(rol)) {
     throw new AppError('Rol inválido');
   }
@@ -27,10 +39,7 @@ export const listUsers = async () => {
 };
 
 export const createUser = async (payload) => {
-  if (!payload.password) {
-    throw new AppError('La contraseña es requerida');
-  }
-  validateUserPayload(payload);
+  validateUserPayload(payload, { requirePassword: true });
   const passwordHash = await bcrypt.hash(payload.password, 10);
   const { rows } = await query(
     `INSERT INTO usuarios (nombre, username, email, password_hash, rol, almacen_id, estado)

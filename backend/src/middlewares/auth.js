@@ -21,7 +21,10 @@ export const authenticate = async (req, _res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    next(error.statusCode ? error : unauthorized('Token inválido'));
+    if (error.name === 'TokenExpiredError') {
+      return next(unauthorized('Sesion expirada. Inicia sesion nuevamente.'));
+    }
+    return next(error.statusCode ? error : unauthorized('Token invalido'));
   }
 };
 

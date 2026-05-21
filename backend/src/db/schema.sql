@@ -11,8 +11,8 @@ CREATE TABLE IF NOT EXISTS almacenes (
   nombre VARCHAR(120) NOT NULL,
   nomenclatura VARCHAR(20) NOT NULL UNIQUE,
   estado BOOLEAN NOT NULL DEFAULT true,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS usuarios (
@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS usuarios (
   rol user_role NOT NULL,
   almacen_id UUID REFERENCES almacenes(id),
   estado BOOLEAN NOT NULL DEFAULT true,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   CONSTRAINT usuarios_almacen_required CHECK (
     (rol = 'almacen' AND almacen_id IS NOT NULL) OR (rol <> 'almacen')
   )
@@ -41,8 +41,8 @@ CREATE TABLE IF NOT EXISTS ventas (
   total NUMERIC(14, 2) NOT NULL,
   fuente VARCHAR(40) NOT NULL DEFAULT 'manual',
   external_hash TEXT UNIQUE,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS metas (
@@ -51,8 +51,8 @@ CREATE TABLE IF NOT EXISTS metas (
   periodo CHAR(7) NOT NULL,
   monto_meta NUMERIC(14, 2) NOT NULL CHECK (monto_meta >= 0),
   estado BOOLEAN NOT NULL DEFAULT true,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   UNIQUE (almacen_id, periodo)
 );
 
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS ventas_respaldo (
   fuente VARCHAR(40),
   registros JSONB NOT NULL,
   total_registros INTEGER NOT NULL DEFAULT 0,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS sync_runs (
@@ -76,14 +76,14 @@ CREATE TABLE IF NOT EXISTS sync_runs (
   insertadas INTEGER NOT NULL DEFAULT 0,
   duplicadas INTEGER NOT NULL DEFAULT 0,
   total_calculado NUMERIC(14, 2) NOT NULL DEFAULT 0,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS app_settings (
   key TEXT PRIMARY KEY,
   value JSONB NOT NULL,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE INDEX IF NOT EXISTS idx_ventas_fecha ON ventas(fecha);
@@ -95,6 +95,26 @@ CREATE INDEX IF NOT EXISTS idx_sync_runs_created_at ON sync_runs(created_at DESC
 ALTER TABLE ventas DROP CONSTRAINT IF EXISTS ventas_precio_unitario_check;
 ALTER TABLE ventas DROP CONSTRAINT IF EXISTS ventas_total_check;
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS username VARCHAR(80) UNIQUE;
+
+ALTER TABLE almacenes
+  ALTER COLUMN created_at TYPE TIMESTAMPTZ,
+  ALTER COLUMN updated_at TYPE TIMESTAMPTZ;
+ALTER TABLE usuarios
+  ALTER COLUMN created_at TYPE TIMESTAMPTZ,
+  ALTER COLUMN updated_at TYPE TIMESTAMPTZ;
+ALTER TABLE ventas
+  ALTER COLUMN created_at TYPE TIMESTAMPTZ,
+  ALTER COLUMN updated_at TYPE TIMESTAMPTZ;
+ALTER TABLE metas
+  ALTER COLUMN created_at TYPE TIMESTAMPTZ,
+  ALTER COLUMN updated_at TYPE TIMESTAMPTZ;
+ALTER TABLE ventas_respaldo
+  ALTER COLUMN created_at TYPE TIMESTAMPTZ;
+ALTER TABLE sync_runs
+  ALTER COLUMN created_at TYPE TIMESTAMPTZ;
+ALTER TABLE app_settings
+  ALTER COLUMN created_at TYPE TIMESTAMPTZ,
+  ALTER COLUMN updated_at TYPE TIMESTAMPTZ;
 
 CREATE OR REPLACE FUNCTION set_updated_at()
 RETURNS TRIGGER AS $$

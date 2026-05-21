@@ -1,4 +1,5 @@
 import * as authService from '../services/authService.js';
+import { env } from '../config/env.js';
 import { getGoogleAuthUrl, hasGoogleToken, saveGoogleTokenFromCode } from '../services/googleOAuthService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/errors.js';
@@ -21,11 +22,18 @@ export const googleCallback = asyncHandler(async (req, res) => {
   const { code } = req.query;
   if (!code) throw new AppError('Código OAuth requerido');
   await saveGoogleTokenFromCode(code);
+  const targetOrigin = env.frontendUrl || '*';
   res.send(`
     <html>
       <body style="font-family: Arial, sans-serif; padding: 32px;">
-        <h2>Google Sheets conectado</h2>
-        <p>Ya puedes volver al sistema y sincronizar ventas desde Google Sheets.</p>
+        <h2>Google Drive conectado</h2>
+        <p>Ya puedes volver al sistema. Esta ventana se cerrarÃ¡ automÃ¡ticamente.</p>
+        <script>
+          if (window.opener) {
+            window.opener.postMessage({ type: 'google-connected' }, '${targetOrigin}');
+          }
+          setTimeout(() => window.close(), 900);
+        </script>
       </body>
     </html>
   `);

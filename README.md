@@ -62,6 +62,8 @@ FRONTEND_URL=http://localhost:5173
 DATABASE_URL=postgres://postgres:postgres@localhost:5432/ventas_almacenes
 DB_SSL=false
 JWT_SECRET=cambia_este_secreto
+JWT_EXPIRES_IN=1h
+TOKEN_ENCRYPTION_KEY=coloca_una_clave_larga_y_privada_para_tokens_google
 
 GOOGLE_DRIVE_FOLDER_ID=
 GOOGLE_OAUTH_CLIENT_ID=
@@ -111,6 +113,7 @@ Antes de publicar:
 
 - Configura `NODE_ENV=production`.
 - Usa un `JWT_SECRET` fuerte y único.
+- Usa `TOKEN_ENCRYPTION_KEY` para cifrar el token OAuth de Google guardado en base de datos.
 - Configura `DATABASE_URL` con la base real.
 - En Supabase usa `DB_SSL=true` si tu cadena no trae `sslmode=require`.
 - Configura `FRONTEND_URL` con el dominio del frontend publicado.

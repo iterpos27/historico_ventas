@@ -1,6 +1,7 @@
 export const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000/api';
 
 export const tokenStorageKey = 'ventas_token';
+export const authExpiredEvent = 'ventas_auth_expired';
 
 export const apiRequest = async (path, options = {}) => {
   const token = localStorage.getItem(tokenStorageKey);
@@ -15,6 +16,10 @@ export const apiRequest = async (path, options = {}) => {
 
   const data = await response.json().catch(() => ({}));
   if (!response.ok) {
+    if (response.status === 401 && token) {
+      localStorage.removeItem(tokenStorageKey);
+      window.dispatchEvent(new Event(authExpiredEvent));
+    }
     throw new Error(data.message || 'Error en la solicitud');
   }
   return data;

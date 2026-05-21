@@ -41,6 +41,7 @@ export const startAutoSync = () => {
   const minutes = Math.max(Number(env.googleDriveAutoSyncMinutes || 15), 1);
   const intervalMs = minutes * 60 * 1000;
 
+  setTimeout(runDriveAutoSync, 5000);
   timer = setInterval(runDriveAutoSync, intervalMs);
   console.log(`Auto-sync Drive activo cada ${minutes} minuto(s)`);
 };

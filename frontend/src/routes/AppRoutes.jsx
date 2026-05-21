@@ -8,11 +8,11 @@ import { DashboardAlmacen } from '../pages/DashboardAlmacen.jsx';
 import { DashboardJefeComercial } from '../pages/DashboardJefeComercial.jsx';
 import { Login } from '../pages/Login.jsx';
 
-const DashboardByRole = ({ activeSection, setActiveSection }) => {
+const DashboardByRole = ({ activeSection }) => {
   const { user } = useAuth();
-  if (user.rol === 'admin') return <DashboardAdmin activeSection={activeSection} setActiveSection={setActiveSection} />;
-  if (user.rol === 'jefe_comercial') return <DashboardJefeComercial activeSection={activeSection} setActiveSection={setActiveSection} />;
-  return <DashboardAlmacen activeSection={activeSection} setActiveSection={setActiveSection} />;
+  if (user.rol === 'admin') return <DashboardAdmin activeSection={activeSection} />;
+  if (user.rol === 'jefe_comercial') return <DashboardJefeComercial activeSection={activeSection} />;
+  return <DashboardAlmacen activeSection={activeSection} />;
 };
 
 const PrivateRoute = () => {
@@ -30,6 +30,7 @@ export const AppRoutes = () => (
   <Routes>
     <Route path="/login" element={<Login />} />
     <Route path="/" element={<PrivateRoute />} />
+    <Route path="/:section" element={<PrivateRoute />} />
     <Route path="*" element={<Navigate to="/" replace />} />
   </Routes>
 );

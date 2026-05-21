@@ -1,5 +1,6 @@
 import { query } from '../db/pool.js';
 import { AppError, notFound } from '../utils/errors.js';
+import { isValidPeriod } from '../utils/period.js';
 
 const goalSelect = `
   m.id, m.almacen_id, m.periodo, m.monto_meta, m.estado, m.created_at, m.updated_at,
@@ -11,6 +12,7 @@ export const listGoals = async (user, periodo) => {
   const filters = [];
 
   if (periodo) {
+    if (!isValidPeriod(periodo)) throw new AppError('Periodo inválido. Usa formato YYYY-MM.');
     params.push(periodo);
     filters.push(`m.periodo = $${params.length}`);
   }
@@ -32,6 +34,7 @@ export const listGoals = async (user, periodo) => {
 };
 
 export const createGoal = async (payload) => {
+  validateGoalPayload(payload);
   const { rows } = await query(
     `INSERT INTO metas (almacen_id, periodo, monto_meta, estado)
      VALUES ($1, $2, $3, COALESCE($4, true))
@@ -42,6 +45,7 @@ export const createGoal = async (payload) => {
 };
 
 export const updateGoal = async (id, payload) => {
+  validateGoalPayload(payload);
   const { rows } = await query(
     `UPDATE metas
      SET almacen_id = $1, periodo = $2, monto_meta = $3, estado = COALESCE($4, estado)
@@ -65,6 +69,9 @@ export const deactivateGoal = async (id) => {
 export const copyGoals = async ({ from_period, to_period, overwrite = false }) => {
   if (!from_period || !to_period) {
     throw new AppError('from_period y to_period son requeridos');
+  }
+  if (!isValidPeriod(from_period) || !isValidPeriod(to_period)) {
+    throw new AppError('Periodo inválido. Usa formato YYYY-MM.');
   }
   if (from_period === to_period) {
     throw new AppError('El periodo origen y destino deben ser diferentes');
@@ -90,4 +97,13 @@ export const copyGoals = async ({ from_period, to_period, overwrite = false }) =
     to_period,
     overwrite
   };
+};
+
+const validateGoalPayload = (payload) => {
+  if (!payload.almacen_id) throw new AppError('almacen_id es requerido');
+  if (!isValidPeriod(payload.periodo)) throw new AppError('Periodo inválido. Usa formato YYYY-MM.');
+  const monto = Number(payload.monto_meta);
+  if (Number.isNaN(monto) || monto < 0) {
+    throw new AppError('La meta debe ser un número mayor o igual a 0');
+  }
 };

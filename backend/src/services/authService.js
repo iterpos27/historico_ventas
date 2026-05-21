@@ -27,7 +27,7 @@ export const login = async ({ email, password }) => {
   const token = jwt.sign(
     { user_id: user.id, rol: user.rol, almacen_id: user.almacen_id },
     env.jwtSecret,
-    { expiresIn: '8h' }
+    { expiresIn: env.jwtExpiresIn }
   );
 
   delete user.password_hash;

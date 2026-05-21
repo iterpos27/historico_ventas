@@ -269,6 +269,76 @@ const backupAndDeleteSalesForPeriod = async (client, period, source) => {
   return existing.rowCount;
 };
 
+const loadActiveBranches = async (client) => {
+  const { rows } = await client.query(
+    `SELECT id, nombre, nomenclatura
+     FROM almacenes
+     WHERE estado = true
+     ORDER BY LENGTH(nombre) DESC`
+  );
+
+  return rows.map((branch) => ({
+    ...branch,
+    nameKey: normalizeKey(branch.nombre),
+    branchNameKey: normalizeBranchName(branch.nombre),
+    codeKey: normalizeKey(branch.nomenclatura)
+  }));
+};
+
+const findBranchForRecord = (branches, record) => {
+  const nameKey = normalizeKey(record.establecimiento);
+  const branchNameKey = normalizeBranchName(record.establecimiento);
+  const codeKey = normalizeKey(record.nomenclatura || record.establecimiento);
+
+  return branches.find((branch) => (
+    branch.nameKey === nameKey ||
+    nameKey.startsWith(`${branch.nameKey} `) ||
+    branch.codeKey === codeKey ||
+    branch.branchNameKey === branchNameKey
+  ));
+};
+
+const bulkInsertSales = async (client, rows) => {
+  if (!rows.length) return 0;
+
+  const chunkSize = 500;
+  let inserted = 0;
+
+  for (let index = 0; index < rows.length; index += chunkSize) {
+    const chunk = rows.slice(index, index + chunkSize);
+    const result = await client.query(
+      `INSERT INTO ventas (fecha, almacen_id, producto, cantidad, precio_unitario, total, fuente, external_hash)
+       SELECT *
+       FROM UNNEST(
+         $1::date[],
+         $2::uuid[],
+         $3::text[],
+         $4::numeric[],
+         $5::numeric[],
+         $6::numeric[],
+         $7::text[],
+         $8::text[]
+       )
+       ON CONFLICT (external_hash) DO NOTHING
+       RETURNING id`,
+      [
+        chunk.map((row) => row.fecha),
+        chunk.map((row) => row.almacen_id),
+        chunk.map((row) => row.producto),
+        chunk.map((row) => row.cantidad),
+        chunk.map((row) => row.precio_unitario),
+        chunk.map((row) => row.total),
+        chunk.map((row) => row.fuente),
+        chunk.map((row) => row.external_hash)
+      ]
+    );
+
+    inserted += result.rowCount;
+  }
+
+  return inserted;
+};
+
 export const importSalesRecords = async (records, source, options = {}) => {
   const client = await pool.connect();
   const result = {
@@ -286,58 +356,19 @@ export const importSalesRecords = async (records, source, options = {}) => {
       result.replaced = await backupAndDeleteSalesForPeriod(client, options.period, source);
     }
 
+    const branches = await loadActiveBranches(client);
+    const rowsToInsert = [];
+
     for (const record of records) {
       if (!record.fecha || !record.establecimiento || Number.isNaN(record.total)) {
         result.errors.push({ line: record.line, message: 'Fecha, establecimiento o total inválido' });
         continue;
       }
 
-      const branch = await client.query(
-        `SELECT id FROM almacenes
-         WHERE estado = true
-           AND (
-             LOWER(nombre) = LOWER($1)
-             OR LOWER($1) LIKE LOWER(nombre) || ' %'
-             OR UPPER(nomenclatura) = UPPER($2)
-             OR UPPER(
-               regexp_replace(
-                 translate(nombre, 'ÁÉÍÓÚáéíóú', 'AEIOUaeiou'),
-                 '\\m0+([0-9]+)\\M',
-                 '\\1',
-                 'g'
-               )
-             ) = $3
-           )
-         ORDER BY LENGTH(nombre) DESC
-         LIMIT 1`,
-        [
-          record.establecimiento,
-          record.nomenclatura || record.establecimiento,
-          normalizeBranchName(record.establecimiento)
-        ]
-      );
-
-      if (!branch.rows[0]) {
+      const branch = findBranchForRecord(branches, record);
+      if (!branch) {
         result.errors.push({ line: record.line, message: `Almacén no existe: ${record.establecimiento}` });
         continue;
-      }
-
-      if (source === MATRIX_SOURCE) {
-        const duplicate = await client.query(
-          `SELECT id FROM ventas
-           WHERE fecha = $1
-             AND almacen_id = $2
-             AND producto = $3
-             AND total = $4
-             AND fuente = ANY($5)
-           LIMIT 1`,
-          [record.fecha, branch.rows[0].id, record.producto, record.total, MATRIX_SOURCES]
-        );
-
-        if (duplicate.rowCount) {
-          result.skipped += 1;
-          continue;
-        }
       }
 
       const externalHash = hashRecord({
@@ -349,26 +380,20 @@ export const importSalesRecords = async (records, source, options = {}) => {
         total: record.total
       });
 
-      const insert = await client.query(
-        `INSERT INTO ventas (fecha, almacen_id, producto, cantidad, precio_unitario, total, fuente, external_hash)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-         ON CONFLICT (external_hash) DO NOTHING
-         RETURNING id`,
-        [
-          record.fecha,
-          branch.rows[0].id,
-          record.producto,
-          record.cantidad,
-          record.precio_unitario,
-          record.total,
-          source,
-          externalHash
-        ]
-      );
-
-      if (insert.rowCount) result.inserted += 1;
-      else result.skipped += 1;
+      rowsToInsert.push({
+        fecha: record.fecha,
+        almacen_id: branch.id,
+        producto: record.producto,
+        cantidad: record.cantidad,
+        precio_unitario: record.precio_unitario,
+        total: record.total,
+        fuente: source,
+        external_hash: externalHash
+      });
     }
+
+    result.inserted = await bulkInsertSales(client, rowsToInsert);
+    result.skipped += rowsToInsert.length - result.inserted;
 
     await client.query('COMMIT');
     return result;

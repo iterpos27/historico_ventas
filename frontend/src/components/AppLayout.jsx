@@ -1,5 +1,6 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Activity, BarChart3, Building2, LogOut, Target, Users } from 'lucide-react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { BrandLogo } from './BrandLogo.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 
@@ -21,15 +22,26 @@ const menuByRole = {
 
 export const AppLayout = ({ children }) => {
   const { user, logout } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
   const menu = menuByRole[user.rol] || [];
-  const [activeSection, setActiveSection] = useState(menu[0]?.id || 'ventas');
+  const requestedSection = location.pathname.split('/').filter(Boolean)[0];
+  const activeSection = menu.some((item) => item.id === requestedSection)
+    ? requestedSection
+    : menu[0]?.id || 'ventas';
   const activeItem = useMemo(
     () => menu.find((item) => item.id === activeSection) || menu[0],
     [activeSection, menu]
   );
 
+  useEffect(() => {
+    if (requestedSection && requestedSection !== activeSection) {
+      navigate(`/${activeSection}`, { replace: true });
+    }
+  }, [activeSection, navigate, requestedSection]);
+
   const enhancedChildren = React.isValidElement(children)
-    ? React.cloneElement(children, { activeSection, setActiveSection })
+    ? React.cloneElement(children, { activeSection })
     : children;
 
   return (
@@ -51,7 +63,7 @@ export const AppLayout = ({ children }) => {
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setActiveSection(item.id)}
+                onClick={() => navigate(`/${item.id}`)}
                 className={`flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm font-semibold transition ${
                   active ? 'bg-white text-brandDark shadow-sm' : 'text-blue-50 hover:bg-white/10'
                 }`}
@@ -98,7 +110,7 @@ export const AppLayout = ({ children }) => {
                 <button
                   key={item.id}
                   type="button"
-                  onClick={() => setActiveSection(item.id)}
+                  onClick={() => navigate(`/${item.id}`)}
                   className={`shrink-0 rounded-md px-3 py-2 text-sm font-semibold ${
                     item.id === activeSection ? 'bg-brand text-white' : 'bg-softBlue text-brandDark'
                   }`}
@@ -121,7 +133,7 @@ export const AppLayout = ({ children }) => {
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setActiveSection(item.id)}
+                onClick={() => navigate(`/${item.id}`)}
                 className={`flex min-h-12 flex-col items-center justify-center gap-1 rounded-md px-1 text-[11px] font-semibold leading-tight ${
                   active ? 'bg-brand text-white' : 'text-brandDark'
                 }`}

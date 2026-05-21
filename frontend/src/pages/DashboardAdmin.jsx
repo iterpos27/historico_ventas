@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, RefreshCw } from 'lucide-react';
 import { API_URL, api } from '../api/client';
 import { AdminPanel } from '../components/AdminPanel.jsx';
@@ -47,6 +47,7 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
   const [excelFile, setExcelFile] = useState(null);
   const [importResult, setImportResult] = useState(null);
   const [replacePeriod, setReplacePeriod] = useState(false);
+  const [googleStatusVersion, setGoogleStatusVersion] = useState(0);
   const [copyGoalsModalOpen, setCopyGoalsModalOpen] = useState(false);
   const [copyGoalsForm, setCopyGoalsForm] = useState({ from_period: currentPeriod(), to_period: currentPeriod(), overwrite: false });
 
@@ -65,8 +66,23 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
   };
 
   const connectGoogle = () => {
-    window.open(`${API_URL}/auth/google`, '_blank', 'noopener,noreferrer');
+    window.open(`${API_URL}/auth/google`, '_blank');
   };
+
+  useEffect(() => {
+    const apiOrigin = new URL(API_URL).origin;
+    const onGoogleMessage = async (event) => {
+      if (event.data?.type !== 'google-connected') return;
+      if (event.origin !== apiOrigin) return;
+      setSyncError('');
+      setSyncMessage('Google Drive conectado correctamente.');
+      setGoogleStatusVersion((value) => value + 1);
+      await reload();
+    };
+
+    window.addEventListener('message', onGoogleMessage);
+    return () => window.removeEventListener('message', onGoogleMessage);
+  }, [reload]);
 
   const fileToBase64 = (file) => new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -131,7 +147,7 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
           <h3 className="text-lg font-semibold text-brandDark">Ventas por almacén</h3>
           <p className="text-sm text-slate-500">Consulta ventas consolidadas y sincroniza información desde Google Drive.</p>
           <div className="mt-2">
-            <GoogleStatusBadge />
+            <GoogleStatusBadge key={googleStatusVersion} />
           </div>
         </div>
         <div className="flex flex-col gap-2 sm:flex-row">

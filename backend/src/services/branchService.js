@@ -1,5 +1,17 @@
 import { query } from '../db/pool.js';
-import { notFound } from '../utils/errors.js';
+import { AppError, notFound } from '../utils/errors.js';
+
+const validateBranchPayload = (payload) => {
+  const nombre = String(payload.nombre || '').trim();
+  const nomenclatura = String(payload.nomenclatura || '').trim();
+
+  if (!nombre || nombre.length > 120) {
+    throw new AppError('El nombre del almacén es requerido y no debe superar 120 caracteres');
+  }
+  if (!nomenclatura || nomenclatura.length > 20) {
+    throw new AppError('La nomenclatura es requerida y no debe superar 20 caracteres');
+  }
+};
 
 export const listBranches = async (user) => {
   const params = [];
@@ -19,6 +31,7 @@ export const listBranches = async (user) => {
 };
 
 export const createBranch = async (payload) => {
+  validateBranchPayload(payload);
   const { rows } = await query(
     `INSERT INTO almacenes (nombre, nomenclatura, estado)
      VALUES ($1, UPPER($2), COALESCE($3, true))
@@ -29,6 +42,7 @@ export const createBranch = async (payload) => {
 };
 
 export const updateBranch = async (id, payload) => {
+  validateBranchPayload(payload);
   const { rows } = await query(
     `UPDATE almacenes
      SET nombre = $1, nomenclatura = UPPER($2), estado = COALESCE($3, estado)

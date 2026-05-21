@@ -1,8 +1,11 @@
 export const currentPeriod = () => new Date().toISOString().slice(0, 7);
+export const isValidPeriod = (period) => /^\d{4}-(0[1-9]|1[0-2])$/.test(String(period || ''));
 
 export const periodToDateRange = (period = currentPeriod()) => {
-  if (!/^\d{4}-\d{2}$/.test(period)) {
-    throw new Error('Periodo inválido. Usa formato YYYY-MM.');
+  if (!isValidPeriod(period)) {
+    const error = new Error('Periodo invalido. Usa formato YYYY-MM.');
+    error.statusCode = 400;
+    throw error;
   }
 
   const [year, month] = period.split('-').map(Number);
