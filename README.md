@@ -101,7 +101,7 @@ VITE_API_URL=http://localhost:4000/api
 6. Sube el archivo de ventas a esa carpeta de Drive.
 7. Pulsa `Sincronizar Drive`.
 
-Si subes un archivo corregido del mismo periodo, marca `Reemplazar ventas del periodo importado`. El sistema respalda las ventas anteriores en `ventas_respaldo` antes de borrar e importar de nuevo.
+Si subes un archivo corregido del mismo periodo, sincroniza de nuevo. La matriz mensual se trata como foto oficial del periodo: el sistema respalda las ventas de matriz anteriores en `ventas_respaldo` y evita acumulados.
 
 ## Importación manual de Excel
 

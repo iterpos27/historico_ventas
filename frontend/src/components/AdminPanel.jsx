@@ -212,7 +212,7 @@ export const AdminPanel = ({ section, branches = [], goals = [], users = [], onR
         <button type="button" onClick={() => setModal(null)} className="rounded-md border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">
           Cancelar
         </button>
-        <button className="rounded-md bg-brand px-4 py-2 text-sm font-semibold text-white">
+        <button className="rounded-md bg-brandDark px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand">
           Guardar
         </button>
       </div>
@@ -290,7 +290,7 @@ export const AdminPanel = ({ section, branches = [], goals = [], users = [], onR
           <h3 className="text-lg font-semibold text-brandDark">Gestión de {section}</h3>
           <p className="text-sm text-slate-500">Crea, edita y desactiva registros desde una ventana modal.</p>
         </div>
-        <button onClick={openCreate} className="flex w-full items-center justify-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-semibold text-white sm:w-auto">
+        <button onClick={openCreate} className="flex w-full items-center justify-center gap-2 rounded-md border border-brand/20 bg-brandDark px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand sm:w-auto">
           <Plus size={18} />
           Nuevo {currentTitle}
         </button>

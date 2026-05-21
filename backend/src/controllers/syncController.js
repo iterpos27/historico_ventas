@@ -13,10 +13,11 @@ export const syncGoogleDrive = asyncHandler(async (req, res) => {
   const replacePeriod = req.body?.replace_period === true;
   try {
     const result = await syncGoogleDriveSales({ replacePeriod });
+    const periodWasReplaced = result.replaced > 0;
     await createSyncRun({
-      tipo: replacePeriod ? 'google_drive_replace' : 'google_drive',
+      tipo: periodWasReplaced ? 'google_drive_replace' : 'google_drive',
       estado: 'ok',
-      mensaje: replacePeriod
+      mensaje: periodWasReplaced
         ? `Periodo ${result.period || ''} reemplazado antes de importar`
         : 'Sincronizacion manual desde Drive',
       driveFile: result.driveFile,
@@ -48,8 +49,9 @@ export const importExcel = asyncHandler(async (req, res) => {
     if (!buffer.length) throw new AppError('El archivo está vacío o no se pudo leer');
 
     const result = await importExcelSalesBuffer(buffer, MATRIX_SOURCE, { replacePeriod });
+    const periodWasReplaced = result.replaced > 0;
     await createSyncRun({
-      tipo: replacePeriod ? 'excel_upload_replace' : 'excel_upload',
+      tipo: periodWasReplaced ? 'excel_upload_replace' : 'excel_upload',
       estado: 'ok',
       mensaje: `Importación manual de archivo ${file_name || 'Excel'}`,
       driveFile: file_name ? { name: file_name } : null,

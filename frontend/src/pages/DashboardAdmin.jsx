@@ -46,7 +46,6 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [excelFile, setExcelFile] = useState(null);
   const [importResult, setImportResult] = useState(null);
-  const [replacePeriod, setReplacePeriod] = useState(false);
   const [googleStatusVersion, setGoogleStatusVersion] = useState(0);
   const [copyGoalsModalOpen, setCopyGoalsModalOpen] = useState(false);
   const [copyGoalsForm, setCopyGoalsForm] = useState({ from_period: currentPeriod(), to_period: currentPeriod(), overwrite: false });
@@ -55,7 +54,7 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
     setSyncMessage('');
     setSyncError('');
     try {
-      const result = await api.post('/sync/google-drive', { replace_period: replacePeriod });
+      const result = await api.post('/sync/google-drive', {});
       const replacement = result.replaced ? ` ${result.replaced} ventas anteriores respaldadas y reemplazadas.` : '';
       setSyncMessage(`Drive sincronizado: ${result.inserted} insertadas, ${result.skipped} duplicadas.${replacement} Total calculado: ${money(result.calculatedTotal)}`);
       setImportResult(result);
@@ -104,8 +103,7 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
       const fileBase64 = await fileToBase64(excelFile);
       const result = await api.post('/sync/excel', {
         file_name: excelFile.name,
-        file_base64: fileBase64,
-        replace_period: replacePeriod
+        file_base64: fileBase64
       });
       setImportResult(result);
       const replacement = result.replaced ? ` ${result.replaced} ventas anteriores respaldadas y reemplazadas.` : '';
@@ -164,18 +162,6 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
           </button>
         </div>
       </div>
-      <label className="flex items-start gap-2 rounded-md border border-blue-100 bg-white px-4 py-3 text-sm text-slate-700 shadow-sm">
-        <input
-          type="checkbox"
-          checked={replacePeriod}
-          onChange={(event) => setReplacePeriod(event.target.checked)}
-          className="mt-1 h-4 w-4 rounded border-blue-300 text-brand focus:ring-brand"
-        />
-        <span>
-          <span className="block font-semibold text-brandDark">Reemplazar ventas del periodo importado</span>
-          <span className="text-slate-500">Úsalo cuando subas un archivo corregido. El sistema respalda las ventas anteriores de ese periodo antes de borrarlas.</span>
-        </span>
-      </label>
       {syncMessage ? <div className="rounded-md border border-blue-200 bg-softBlue px-4 py-3 text-sm text-brandDark">{syncMessage}</div> : null}
       <ErrorMessage message={syncError} />
       {importResult?.errors?.length ? (
