@@ -25,17 +25,7 @@ const previousPeriod = (period) => {
 };
 
 const loadAdminData = async (period) => {
-  const [total, ventasPorAlmacen, cumplimiento, branches, goals, users, historial, syncHistory] = await Promise.all([
-    api.get(withPeriod('/ventas/total', period)),
-    api.get(withPeriod('/ventas/por-almacen', period)),
-    api.get(withPeriod('/ventas/cumplimiento-metas', period)),
-    api.get('/almacenes'),
-    api.get(withPeriod('/metas', period)),
-    api.get('/usuarios'),
-    api.get('/ventas/historial-mensual'),
-    api.get('/sync/historial')
-  ]);
-  return { total, ventasPorAlmacen, cumplimiento, branches, goals, users, historial, syncHistory };
+  return api.get(withPeriod('/dashboard/admin', period));
 };
 
 export const DashboardAdmin = ({ activeSection = 'ventas' }) => {

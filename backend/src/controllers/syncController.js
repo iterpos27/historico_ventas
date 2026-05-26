@@ -4,6 +4,7 @@ import { importExcelSalesBuffer, MATRIX_SOURCE } from '../services/salesImportSe
 import { createSyncRun, listSyncRuns } from '../services/syncLogService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/errors.js';
+import { clearCache } from '../utils/memoryCache.js';
 
 export const syncGoogleSheets = asyncHandler(async (_req, res) => {
   res.json(await syncGoogleSheetSales());
@@ -26,6 +27,7 @@ export const syncGoogleDrive = asyncHandler(async (req, res) => {
       skipped: result.skipped,
       calculatedTotal: result.calculatedTotal
     });
+    clearCache('sales:');
     res.json(result);
   } catch (error) {
     await createSyncRun({
@@ -60,6 +62,7 @@ export const importExcel = asyncHandler(async (req, res) => {
       skipped: result.skipped,
       calculatedTotal: result.calculatedTotal
     });
+    clearCache('sales:');
     return res.json(result);
   }
 

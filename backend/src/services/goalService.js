@@ -1,5 +1,6 @@
 import { query } from '../db/pool.js';
 import { AppError, notFound } from '../utils/errors.js';
+import { clearCache } from '../utils/memoryCache.js';
 import { isValidPeriod } from '../utils/period.js';
 
 const goalSelect = `
@@ -41,6 +42,7 @@ export const createGoal = async (payload) => {
      RETURNING *`,
     [payload.almacen_id, payload.periodo, payload.monto_meta, payload.estado]
   );
+  clearCache('sales:');
   return rows[0];
 };
 
@@ -54,6 +56,7 @@ export const updateGoal = async (id, payload) => {
     [payload.almacen_id, payload.periodo, payload.monto_meta, payload.estado, id]
   );
   if (!rows[0]) throw notFound('Meta no encontrada');
+  clearCache('sales:');
   return rows[0];
 };
 
@@ -63,6 +66,7 @@ export const deactivateGoal = async (id) => {
     [id]
   );
   if (!rows[0]) throw notFound('Meta no encontrada');
+  clearCache('sales:');
   return rows[0];
 };
 
@@ -91,6 +95,7 @@ export const copyGoals = async ({ from_period, to_period, overwrite = false }) =
     [from_period, to_period]
   );
 
+  clearCache('sales:');
   return {
     copied: rows.length,
     from_period,

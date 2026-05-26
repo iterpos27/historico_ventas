@@ -111,6 +111,22 @@ const readGoogleToken = async () => {
   return deserializeToken(JSON.parse(raw));
 };
 
+export const clearGoogleToken = async () => {
+  await query('DELETE FROM app_settings WHERE key = $1', [googleTokenKey]).catch(() => null);
+  await fs.rm(tokenPath, { force: true }).catch(() => null);
+};
+
+export const isGoogleInvalidGrant = (error) => {
+  const message = [
+    error.response?.data?.error,
+    error.response?.data?.error_description,
+    error.response?.data?.error?.message,
+    error.message
+  ].filter(Boolean).join(' ').toLowerCase();
+
+  return message.includes('invalid_grant');
+};
+
 export const saveGoogleTokenFromCode = async (code) => {
   const client = getOAuthClient();
   const { tokens } = await client.getToken(code);

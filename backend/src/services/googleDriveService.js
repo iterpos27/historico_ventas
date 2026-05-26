@@ -1,7 +1,7 @@
 import { google } from 'googleapis';
 import { env } from '../config/env.js';
 import { AppError } from '../utils/errors.js';
-import { getAuthorizedOAuthClient } from './googleOAuthService.js';
+import { clearGoogleToken, getAuthorizedOAuthClient, isGoogleInvalidGrant } from './googleOAuthService.js';
 import { importExcelSalesBuffer, MATRIX_SOURCE } from './salesImportService.js';
 
 const googleSheetMime = 'application/vnd.google-apps.spreadsheet';
@@ -77,6 +77,10 @@ export const syncGoogleDriveSales = async (options = {}) => {
     }
   } catch (error) {
     const message = error.response?.data?.error?.message || error.message;
+    if (isGoogleInvalidGrant(error)) {
+      await clearGoogleToken();
+      throw new AppError('Google revocó o expiró la autorización. Presiona Conectar Google nuevamente y luego sincroniza Drive.', 401);
+    }
     if (message?.toLowerCase().includes('insufficient') || message?.toLowerCase().includes('scope')) {
       throw new AppError('Google fue autorizado antes sin permiso de Drive. Presiona Conectar Google nuevamente y acepta el permiso de Google Drive.', 401);
     }
@@ -88,6 +92,10 @@ export const syncGoogleDriveSales = async (options = {}) => {
     buffer = await downloadDriveFile(drive, metadata);
   } catch (error) {
     const message = error.response?.data?.error?.message || error.message;
+    if (isGoogleInvalidGrant(error)) {
+      await clearGoogleToken();
+      throw new AppError('Google revocó o expiró la autorización. Presiona Conectar Google nuevamente y luego sincroniza Drive.', 401);
+    }
     throw new AppError(`No se pudo descargar el archivo de Drive: ${message}`, error.status || 400);
   }
 

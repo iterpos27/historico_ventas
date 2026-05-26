@@ -1,5 +1,14 @@
 import { query } from '../db/pool.js';
+import { remember } from '../utils/memoryCache.js';
 import { currentPeriod, periodToDateRange } from '../utils/period.js';
+
+const salesCacheKey = (name, user, periodo = '') => [
+  'sales',
+  name,
+  user.rol,
+  user.almacen_id || 'all',
+  periodo || currentPeriod()
+].join(':');
 
 const scopeFilter = (user, params) => {
   if (user.rol !== 'almacen') return '';
@@ -8,6 +17,8 @@ const scopeFilter = (user, params) => {
 };
 
 export const getTotalSales = async (user, periodo) => {
+  const cacheKey = salesCacheKey('total', user, periodo);
+  return remember(cacheKey, async () => {
   const { start, end } = periodToDateRange(periodo || currentPeriod());
   const params = [start, end];
   const scope = scopeFilter(user, params);
@@ -18,9 +29,12 @@ export const getTotalSales = async (user, periodo) => {
     params
   );
   return rows[0];
+  });
 };
 
 export const getSalesSummary = async (user, periodo) => {
+  const cacheKey = salesCacheKey('summary', user, periodo);
+  return remember(cacheKey, async () => {
   const { start, end } = periodToDateRange(periodo || currentPeriod());
   const today = new Date().toISOString().slice(0, 10);
   const params = [start, end, today];
@@ -35,9 +49,12 @@ export const getSalesSummary = async (user, periodo) => {
     params
   );
   return rows[0];
+  });
 };
 
 export const getSalesByBranch = async (user, periodo) => {
+  const cacheKey = salesCacheKey('by-branch', user, periodo);
+  return remember(cacheKey, async () => {
   const { start, end } = periodToDateRange(periodo || currentPeriod());
   const params = [start, end];
   let scope = '';
@@ -56,9 +73,12 @@ export const getSalesByBranch = async (user, periodo) => {
     params
   );
   return rows;
+  });
 };
 
 export const getGoalCompliance = async (user, periodo) => {
+  const cacheKey = salesCacheKey('goal-compliance', user, periodo);
+  return remember(cacheKey, async () => {
   const range = periodToDateRange(periodo || currentPeriod());
   const params = [range.period, range.start, range.end];
   const filters = ['m.estado = true'];
@@ -87,9 +107,12 @@ export const getGoalCompliance = async (user, periodo) => {
     params
   );
   return rows;
+  });
 };
 
 export const getMonthlyHistory = async (user) => {
+  const cacheKey = salesCacheKey('monthly-history', user, 'all');
+  return remember(cacheKey, async () => {
   const params = [];
   const filters = [];
 
@@ -134,4 +157,5 @@ export const getMonthlyHistory = async (user) => {
     params
   );
   return rows;
+  });
 };

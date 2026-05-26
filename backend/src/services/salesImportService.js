@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import XLSX from 'xlsx';
 import { pool } from '../db/pool.js';
+import { clearCache } from '../utils/memoryCache.js';
 import { periodToDateRange } from '../utils/period.js';
 
 const ORANGE_RGB = 'F79646';
@@ -396,6 +397,7 @@ export const importSalesRecords = async (records, source, options = {}) => {
     result.skipped += rowsToInsert.length - result.inserted;
 
     await client.query('COMMIT');
+    clearCache('sales:');
     return result;
   } catch (error) {
     await client.query('ROLLBACK');
