@@ -1,5 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import { Link, RefreshCw } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { toJpeg } from 'html-to-image';
+import { Download, Link, RefreshCw } from 'lucide-react';
 import { API_URL, api } from '../api/client';
 import { AdminPanel } from '../components/AdminPanel.jsx';
 import { ErrorMessage } from '../components/ErrorMessage.jsx';
@@ -36,9 +37,11 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
   const [importModalOpen, setImportModalOpen] = useState(false);
   const [excelFile, setExcelFile] = useState(null);
   const [importResult, setImportResult] = useState(null);
+  const [exportingImage, setExportingImage] = useState(false);
   const [googleStatusVersion, setGoogleStatusVersion] = useState(0);
   const [copyGoalsModalOpen, setCopyGoalsModalOpen] = useState(false);
   const [copyGoalsForm, setCopyGoalsForm] = useState({ from_period: currentPeriod(), to_period: currentPeriod(), overwrite: false });
+  const commercialSummaryRef = useRef(null);
 
   const syncDrive = async () => {
     setSyncMessage('');
@@ -56,6 +59,29 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
 
   const connectGoogle = () => {
     window.open(`${API_URL}/auth/google`, '_blank');
+  };
+
+  const downloadCommercialSummary = async () => {
+    if (!commercialSummaryRef.current || exportingImage) return;
+    setExportingImage(true);
+    setSyncError('');
+
+    try {
+      const dataUrl = await toJpeg(commercialSummaryRef.current, {
+        quality: 0.95,
+        pixelRatio: 2,
+        backgroundColor: '#ffffff',
+        cacheBust: true
+      });
+      const link = document.createElement('a');
+      link.download = `ventas-vs-meta-${period}.jpg`;
+      link.href = dataUrl;
+      link.click();
+    } catch (err) {
+      setSyncError(`No se pudo generar la imagen: ${err.message}`);
+    } finally {
+      setExportingImage(false);
+    }
   };
 
   useEffect(() => {
@@ -165,8 +191,23 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
         <SummaryCard label="Cumplimiento global" value={percent(cumplimientoGlobal)} />
         <SummaryCard label="Almacenes activos" value={data.branches.filter((branch) => branch.estado).length} />
       </div>
-      <GoalComplianceTable rows={data.cumplimiento} title="Ventas vs meta por almacén" />
-      <GoalProgressChart data={data.cumplimiento} />
+      <div className="space-y-3">
+        <div className="flex justify-end">
+          <button
+            type="button"
+            onClick={downloadCommercialSummary}
+            disabled={exportingImage}
+            className="flex w-full items-center justify-center gap-2 rounded-md border border-brand/20 bg-brandDark px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-brand disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+          >
+            <Download size={18} />
+            {exportingImage ? 'Generando JPG...' : 'Descargar JPG'}
+          </button>
+        </div>
+        <div ref={commercialSummaryRef} className="space-y-3 bg-white p-2">
+          <GoalComplianceTable rows={data.cumplimiento} title="Ventas vs meta por almacén" />
+          <GoalProgressChart data={data.cumplimiento} />
+        </div>
+      </div>
       <MonthlySalesChart data={data.historial} />
       <SyncHistoryTable rows={data.syncHistory} />
       {importModalOpen ? (
