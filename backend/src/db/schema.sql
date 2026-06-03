@@ -116,30 +116,33 @@ ALTER TABLE app_settings
   ALTER COLUMN created_at TYPE TIMESTAMPTZ,
   ALTER COLUMN updated_at TYPE TIMESTAMPTZ;
 
-CREATE OR REPLACE FUNCTION set_updated_at()
-RETURNS TRIGGER AS $$
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = pg_catalog, public
+AS $$
 BEGIN
   NEW.updated_at = NOW();
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$;
 
 DROP TRIGGER IF EXISTS trg_almacenes_updated_at ON almacenes;
 CREATE TRIGGER trg_almacenes_updated_at BEFORE UPDATE ON almacenes
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 DROP TRIGGER IF EXISTS trg_usuarios_updated_at ON usuarios;
 CREATE TRIGGER trg_usuarios_updated_at BEFORE UPDATE ON usuarios
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 DROP TRIGGER IF EXISTS trg_ventas_updated_at ON ventas;
 CREATE TRIGGER trg_ventas_updated_at BEFORE UPDATE ON ventas
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 DROP TRIGGER IF EXISTS trg_metas_updated_at ON metas;
 CREATE TRIGGER trg_metas_updated_at BEFORE UPDATE ON metas
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 
 DROP TRIGGER IF EXISTS trg_app_settings_updated_at ON app_settings;
 CREATE TRIGGER trg_app_settings_updated_at BEFORE UPDATE ON app_settings
-FOR EACH ROW EXECUTE FUNCTION set_updated_at();
+FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
