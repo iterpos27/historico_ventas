@@ -3,6 +3,7 @@ import { toJpeg } from 'html-to-image';
 import { Download, Link, RefreshCw } from 'lucide-react';
 import { API_URL, api } from '../api/client';
 import { AdminPanel } from '../components/AdminPanel.jsx';
+import { CutoffLegend } from '../components/CutoffLegend.jsx';
 import { ErrorMessage } from '../components/ErrorMessage.jsx';
 import { GoalComplianceTable } from '../components/GoalComplianceTable.jsx';
 import { GoogleStatusBadge } from '../components/GoogleStatusBadge.jsx';
@@ -156,6 +157,7 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
   const sales = (
     <div className="space-y-5">
       <PeriodFilter value={period} onChange={setPeriod} />
+      <CutoffLegend cutoff={data.cutoff} />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-brandDark">Ventas por almacén</h3>

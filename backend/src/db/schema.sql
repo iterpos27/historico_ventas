@@ -72,6 +72,7 @@ CREATE TABLE IF NOT EXISTS sync_runs (
   mensaje TEXT,
   archivo_id TEXT,
   archivo_nombre TEXT,
+  archivo_modificado_at TIMESTAMPTZ,
   periodo CHAR(7),
   insertadas INTEGER NOT NULL DEFAULT 0,
   duplicadas INTEGER NOT NULL DEFAULT 0,
@@ -95,6 +96,7 @@ CREATE INDEX IF NOT EXISTS idx_sync_runs_created_at ON sync_runs(created_at DESC
 ALTER TABLE ventas DROP CONSTRAINT IF EXISTS ventas_precio_unitario_check;
 ALTER TABLE ventas DROP CONSTRAINT IF EXISTS ventas_total_check;
 ALTER TABLE usuarios ADD COLUMN IF NOT EXISTS username VARCHAR(80) UNIQUE;
+ALTER TABLE sync_runs ADD COLUMN IF NOT EXISTS archivo_modificado_at TIMESTAMPTZ;
 
 ALTER TABLE almacenes
   ALTER COLUMN created_at TYPE TIMESTAMPTZ,

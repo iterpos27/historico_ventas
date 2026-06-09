@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../api/client';
+import { CutoffLegend } from '../components/CutoffLegend.jsx';
 import { ErrorMessage } from '../components/ErrorMessage.jsx';
 import { LoadingState } from '../components/LoadingState.jsx';
 import { PeriodFilter } from '../components/PeriodFilter.jsx';
@@ -26,12 +27,13 @@ const progressColor = (value) => {
 };
 
 const loadData = async (period) => {
-  const [resumen, cumplimiento, historial] = await Promise.all([
+  const [resumen, cumplimiento, historial, cutoff] = await Promise.all([
     api.get(withPeriod('/ventas/resumen', period)),
     api.get(withPeriod('/ventas/cumplimiento-metas', period)),
-    api.get('/ventas/historial-mensual')
+    api.get('/ventas/historial-mensual'),
+    api.get('/sync/corte')
   ]);
-  return { resumen, cumplimiento, historial };
+  return { resumen, cumplimiento, historial, cutoff };
 };
 
 export const DashboardAlmacen = () => {
@@ -58,6 +60,7 @@ export const DashboardAlmacen = () => {
         <h3 className="text-2xl font-semibold text-brandDark">{user.almacen_nombre}</h3>
         <p className="text-sm font-medium text-slate-500">{user.almacen_nomenclatura}</p>
       </div>
+      <CutoffLegend cutoff={data.cutoff} />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-2 xl:grid-cols-4">
         <SummaryCard label="Meta del mes" value={money(goal.monto_meta)} tone="brand" />
         <SummaryCard label="Ventas del mes" value={money(data.resumen.ventas_mes)} tone={tone} />

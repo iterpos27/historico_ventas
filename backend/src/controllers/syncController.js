@@ -1,7 +1,7 @@
 import { syncGoogleDriveSales } from '../services/googleDriveService.js';
 import { syncGoogleSheetSales } from '../services/googleSheetsService.js';
 import { importExcelSalesBuffer, MATRIX_SOURCE } from '../services/salesImportService.js';
-import { createSyncRun, listSyncRuns } from '../services/syncLogService.js';
+import { createSyncRun, getLatestCutoff, listSyncRuns } from '../services/syncLogService.js';
 import { asyncHandler } from '../utils/asyncHandler.js';
 import { AppError } from '../utils/errors.js';
 import { clearCache } from '../utils/memoryCache.js';
@@ -71,4 +71,8 @@ export const importExcel = asyncHandler(async (req, res) => {
 
 export const syncHistory = asyncHandler(async (_req, res) => {
   res.json(await listSyncRuns());
+});
+
+export const cutoff = asyncHandler(async (_req, res) => {
+  res.json(await getLatestCutoff());
 });

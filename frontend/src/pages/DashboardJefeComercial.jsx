@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api } from '../api/client';
+import { CutoffLegend } from '../components/CutoffLegend.jsx';
 import { ErrorMessage } from '../components/ErrorMessage.jsx';
 import { GoalComplianceTable } from '../components/GoalComplianceTable.jsx';
 import { LoadingState } from '../components/LoadingState.jsx';
@@ -14,12 +15,13 @@ const currentPeriod = () => new Date().toISOString().slice(0, 7);
 const withPeriod = (path, period) => `${path}?periodo=${encodeURIComponent(period)}`;
 
 const loadDataByPeriod = async (period) => {
-  const [total, cumplimiento, historial] = await Promise.all([
+  const [total, cumplimiento, historial, cutoff] = await Promise.all([
     api.get(withPeriod('/ventas/total', period)),
     api.get(withPeriod('/ventas/cumplimiento-metas', period)),
-    api.get('/ventas/historial-mensual')
+    api.get('/ventas/historial-mensual'),
+    api.get('/sync/corte')
   ]);
-  return { total, cumplimiento, historial };
+  return { total, cumplimiento, historial, cutoff };
 };
 
 export const DashboardJefeComercial = ({ activeSection = 'ventas' }) => {
@@ -35,6 +37,7 @@ export const DashboardJefeComercial = ({ activeSection = 'ventas' }) => {
   const ventas = (
     <div className="space-y-6">
       <PeriodFilter value={period} onChange={setPeriod} />
+      <CutoffLegend cutoff={data.cutoff} />
       <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
         <SummaryCard label="Total global de ventas" value={money(data.total.total)} helper={period} />
         <SummaryCard label="Meta global" value={money(metaGlobal)} />

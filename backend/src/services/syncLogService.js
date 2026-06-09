@@ -12,10 +12,10 @@ export const createSyncRun = async ({
 }) => {
   const { rows } = await query(
     `INSERT INTO sync_runs (
-       tipo, estado, mensaje, archivo_id, archivo_nombre, periodo,
+       tipo, estado, mensaje, archivo_id, archivo_nombre, archivo_modificado_at, periodo,
        insertadas, duplicadas, total_calculado
      )
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
      RETURNING *`,
     [
       tipo,
@@ -23,6 +23,7 @@ export const createSyncRun = async ({
       mensaje,
       driveFile?.id || null,
       driveFile?.name || null,
+      driveFile?.modifiedTime || null,
       period,
       inserted,
       skipped,
@@ -40,4 +41,16 @@ export const listSyncRuns = async () => {
      LIMIT 20`
   );
   return rows;
+};
+
+export const getLatestCutoff = async () => {
+  const { rows } = await query(
+    `SELECT id, archivo_nombre, archivo_modificado_at, created_at,
+       COALESCE(archivo_modificado_at, created_at) AS cutoff_at
+     FROM sync_runs
+     WHERE estado = 'ok'
+     ORDER BY COALESCE(archivo_modificado_at, created_at) DESC, created_at DESC
+     LIMIT 1`
+  );
+  return rows[0] || null;
 };
