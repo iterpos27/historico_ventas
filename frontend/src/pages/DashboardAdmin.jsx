@@ -206,6 +206,7 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
           </button>
         </div>
         <div ref={commercialSummaryRef} className="space-y-3 bg-white p-2">
+          <CutoffLegend cutoff={data.cutoff} />
           <GoalComplianceTable rows={data.cumplimiento} title="Ventas vs meta por almacén" />
           <GoalProgressChart data={data.cumplimiento} />
         </div>
