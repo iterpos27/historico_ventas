@@ -16,7 +16,7 @@ import { SystemStatusPanel } from '../components/SystemStatusPanel.jsx';
 import { GoalProgressChart } from '../components/charts/GoalProgressChart.jsx';
 import { MonthlySalesChart } from '../components/charts/MonthlySalesChart.jsx';
 import { useApi } from '../hooks/useApi.js';
-import { money, percent } from '../utils/format.js';
+import { cutoffDateTime, money, percent } from '../utils/format.js';
 
 const currentPeriod = () => new Date().toISOString().slice(0, 7);
 const withPeriod = (path, period) => `${path}?periodo=${encodeURIComponent(period)}`;
@@ -153,6 +153,7 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
   const metaGlobal = data.cumplimiento.reduce((sum, row) => sum + Number(row.monto_meta || 0), 0);
   const ventasGlobales = data.cumplimiento.reduce((sum, row) => sum + Number(row.ventas_periodo || 0), 0);
   const cumplimientoGlobal = metaGlobal ? (ventasGlobales / metaGlobal) * 100 : 0;
+  const cutoffAt = data.cutoff?.cutoff_at || data.cutoff?.archivo_modificado_at || data.cutoff?.created_at;
 
   const sales = (
     <div className="space-y-5">
@@ -206,7 +207,9 @@ export const DashboardAdmin = ({ activeSection = 'ventas' }) => {
           </button>
         </div>
         <div ref={commercialSummaryRef} className="space-y-3 bg-white p-2">
-          <CutoffLegend cutoff={data.cutoff} />
+          <div className="w-full rounded-md border border-blue-100 bg-white px-4 py-3 text-right text-sm font-bold uppercase tracking-wide text-brandDark">
+            Fecha de corte: {cutoffDateTime(cutoffAt)}
+          </div>
           <GoalComplianceTable rows={data.cumplimiento} title="Ventas vs meta por almacén" />
           <GoalProgressChart data={data.cumplimiento} />
         </div>
